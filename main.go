@@ -1,9 +1,9 @@
 package main
 
 import (
-    "log"
     "net/http"
     "github.com/gorilla/mux"
+    "github.com/rs/cors"
     "./controllers"
 )
 
@@ -16,6 +16,7 @@ func main() {
     router.HandleFunc("/api/leaderboard/{id}", controllers.UpdateEntry).Methods("PATCH")
 	router.HandleFunc("/api/leaderboard/{id}", controllers.DeleteEntry).Methods("DELETE")
 
-    log.Fatal(http.ListenAndServe(":8080", router))
+    handler := cors.Default().Handler(router)
+    http.ListenAndServe(":8080", handler)
 }
 
