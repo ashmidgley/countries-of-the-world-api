@@ -15,6 +15,9 @@ func main() {
     router.HandleFunc("/api/leaderboard", controllers.CreateEntry).Methods("POST")
     router.HandleFunc("/api/leaderboard/{id}", controllers.UpdateEntry).Methods("PATCH")
 	router.HandleFunc("/api/leaderboard/{id}", controllers.DeleteEntry).Methods("DELETE")
+    router.HandleFunc("/api/countries", controllers.GetCountries).Methods("GET")
+    router.HandleFunc("/api/countries/map", controllers.GetCountriesMap).Methods("GET")
+    router.HandleFunc("/api/codes", controllers.GetCodes).Methods("GET")
 
     handler := cors.Default().Handler(router)
     http.ListenAndServe(":8080", handler)
