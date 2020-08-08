@@ -29,7 +29,7 @@ func main() {
     router.HandleFunc("/api/leaderboard", controllers.GetEntries).Methods("GET")
     router.HandleFunc("/api/leaderboard/{id}", controllers.GetEntry).Methods("GET")
     router.HandleFunc("/api/leaderboard", controllers.CreateEntry).Methods("POST")
-    router.HandleFunc("/api/leaderboard/{id}", controllers.UpdateEntry).Methods("PATCH")
+    router.HandleFunc("/api/leaderboard/{id}", controllers.UpdateEntry).Methods("PUT")
     router.HandleFunc("/api/leaderboard/{id}", controllers.DeleteEntry).Methods("DELETE")
     router.HandleFunc("/api/countries", controllers.GetCountries).Methods("GET")
     router.HandleFunc("/api/countries/map", controllers.GetCountriesMap).Methods("GET")
