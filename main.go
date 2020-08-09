@@ -36,6 +36,7 @@ func main() {
     router.HandleFunc("/api/leaderboard/{id}", updateEntry).Methods("PUT")
     router.HandleFunc("/api/leaderboard/{id}", deleteEntry).Methods("DELETE")
     router.HandleFunc("/api/countries", getCountries).Methods("GET")
+    router.HandleFunc("/api/countries/alternatives", getAlternativeNamings).Methods("GET")
     router.HandleFunc("/api/countries/map", getCountriesMap).Methods("GET")
     router.HandleFunc("/api/codes", getCodes).Methods("GET")
 
@@ -297,10 +298,9 @@ var countries = [...]string{
     "costa rica",
     "croatia",
     "cuba",
-    "curaçao",
+    "curacao",
     "cyprus",
     "czech republic",
-    "côte d'ivoire",
     "democratic republic of congo",
     "denmark",
     "djibouti",
@@ -354,6 +354,7 @@ var countries = [...]string{
     "isle of man",
     "israel",
     "italy",
+    "ivory coast",
     "jamaica",
     "japan",
     "jarvis island",
@@ -367,7 +368,7 @@ var countries = [...]string{
     "kosovo",
     "kuwait",
     "kyrgyzstan",
-    "lao people's democratic republic",
+    "laos",
     "latvia",
     "lebanon",
     "lesotho",
@@ -416,7 +417,7 @@ var countries = [...]string{
     "oman",
     "pakistan",
     "palau",
-    "palestinian territories",
+    "palestine",
     "panama",
     "papua new guinea",
     "paraguay",
@@ -453,7 +454,7 @@ var countries = [...]string{
     "solomon islands",
     "somalia",
     "south africa",
-    "south georgia and south sandwich islands",
+    "south georgia and the south sandwich islands",
     "south korea",
     "south sudan",
     "spain",
@@ -497,6 +498,15 @@ var countries = [...]string{
     "yemen",
     "zambia",
     "zimbabwe",
+}
+
+var alternativeNamings = [...]string{
+    "curaçao",
+    "côte d'ivoire",
+    "cote d'ivoire",
+    "lao people's democratic republic",
+    "palestinian territories",
+    "south georgia and south sandwich islands",
 }
 
 var countriesMap = map[string]string{
@@ -556,9 +566,12 @@ var countriesMap = map[string]string{
     "croatia": "Croatia",
     "cuba": "Cuba",
     "curaçao": "Curaçao",
+    "curacao": "Curaçao",
     "cyprus": "Cyprus",
     "czech republic": "Czech Republic",
     "côte d'ivoire": "Côte d'Ivoire",
+    "cote d'ivoire": "Côte d'Ivoire",
+    "ivory coast": "Côte d'Ivoire",
     "democratic republic of congo": "Democratic Republic of Congo",
     "denmark": "Denmark",
     "djibouti": "Djibouti",
@@ -625,6 +638,7 @@ var countriesMap = map[string]string{
     "kosovo": "Kosovo",
     "kuwait": "Kuwait",
     "kyrgyzstan": "Kyrgyzstan",
+    "laos": "Lao People's Democratic Republic",
     "lao people's democratic republic": "Lao People's Democratic Republic",
     "latvia": "Latvia",
     "lebanon": "Lebanon",
@@ -674,6 +688,7 @@ var countriesMap = map[string]string{
     "oman": "Oman",
     "pakistan": "Pakistan",
     "palau": "Palau",
+    "palestine": "Palestinian Territories",
     "palestinian territories": "Palestinian Territories",
     "panama": "Panama",
     "papua new guinea": "Papua New Guinea",
@@ -711,6 +726,7 @@ var countriesMap = map[string]string{
     "solomon islands": "Solomon Islands",
     "somalia": "Somalia",
     "south africa": "South Africa",
+    "south georgia and the south sandwich islands": "South Georgia and South Sandwich Islands",
     "south georgia and south sandwich islands": "South Georgia and South Sandwich Islands",
     "south korea": "South Korea",
     "south sudan": "South Sudan",
@@ -759,6 +775,10 @@ var countriesMap = map[string]string{
 
 func getCountries(writer http.ResponseWriter, request *http.Request) {
     json.NewEncoder(writer).Encode(countries)
+}
+
+func getAlternativeNamings(writer http.ResponseWriter, request *http.Request) {
+    json.NewEncoder(writer).Encode(alternativeNamings)
 }
 
 func getCountriesMap(writer http.ResponseWriter, request *http.Request) {
