@@ -507,6 +507,7 @@ var alternativeNamings = [...]string{
     "lao people's democratic republic",
     "palestinian territories",
     "south georgia and south sandwich islands",
+    "macao",
 }
 
 var countriesMap = map[string]string{
@@ -649,6 +650,7 @@ var countriesMap = map[string]string{
     "lithuania": "Lithuania",
     "luxembourg": "Luxembourg",
     "macau": "Macau",
+    "macao": "Macau",
     "macedonia": "Macedonia",
     "madagascar": "Madagascar",
     "malawi": "Malawi",
