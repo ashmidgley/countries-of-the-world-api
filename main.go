@@ -247,7 +247,26 @@ func deleteEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("DELETE FROM leaderboard WHERE id = ?")
+    statement, _ := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
+    defer statement.Close()
+
+    var name string
+    var country string
+    var countries int
+    var time int
+    err = statement.QueryRow(id).Scan(&id, &name, &country, &countries, &time)
+    if err != nil {
+        message := err.Error()
+        if strings.Contains(message, "no rows in result set") {
+            writer.WriteHeader(http.StatusNotFound)
+        } else {
+            writer.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(writer, message)
+        }
+        return
+    }
+
+    statement, err = database.Prepare("DELETE FROM leaderboard WHERE id = ?")
 	if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
@@ -256,6 +275,9 @@ func deleteEntry(writer http.ResponseWriter, request *http.Request) {
     defer statement.Close()
 
     statement.Exec(id)
+
+    entry := Entry { id, name, country, countries, time }
+    json.NewEncoder(writer).Encode(entry)
 }
 
 var countries = [...]string{
