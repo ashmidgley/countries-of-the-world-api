@@ -156,7 +156,20 @@ func createEntry(writer http.ResponseWriter, request *http.Request) {
 
     statement.Exec(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time)
 
+
+    statement, _ = database.Prepare("SELECT id FROM leaderboard WHERE name = ? AND country = ? AND countries = ? AND time = ?")
+    defer statement.Close()
+
+    var id int
+    err = statement.QueryRow(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
+    if err != nil {
+        writer.WriteHeader(http.StatusInternalServerError)
+        fmt.Fprintf(writer, err.Error())
+        return
+    }
+
     writer.WriteHeader(http.StatusCreated)
+    newEntry.Id = id
     json.NewEncoder(writer).Encode(newEntry)
 }
 
