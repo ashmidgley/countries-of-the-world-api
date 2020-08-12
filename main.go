@@ -21,7 +21,7 @@ func main() {
 	}
     defer database.Close()
 
-    statement := "CREATE TABLE IF NOT EXISTS leaderboard (id INTEGER PRIMARY KEY, name TEXT, country TEXT, countries INTEGER, time TEXT)"
+    statement := "CREATE TABLE IF NOT EXISTS leaderboard (id INTEGER PRIMARY KEY, name TEXT, country TEXT, countries INTEGER, time INTEGER)"
     _, err = database.Exec(statement)
     if err != nil {
 		log.Printf("%q: %s\n", err, statement)
@@ -49,7 +49,7 @@ type Entry struct {
     Name string `json:"name"`
     Country string `json:"country"`
     Countries int `json:"countries"`
-    Time string `json:"time"`
+    Time int `json:"time"`
 }
 
 func getEntry(writer http.ResponseWriter, request *http.Request) {
@@ -79,7 +79,7 @@ func getEntry(writer http.ResponseWriter, request *http.Request) {
     var name string
     var country string
     var countries int
-    var time string
+    var time int
     err = statement.QueryRow(id).Scan(&id, &name, &country, &countries, &time)
     if err != nil {
         message := err.Error()
@@ -119,7 +119,7 @@ func getEntries(writer http.ResponseWriter, request *http.Request) {
         var name string
         var country string
         var countries int
-        var time string
+        var time int
         err = rows.Scan(&id, &name, &country, &countries, &time)
         if err != nil {
             fmt.Fprintf(writer, err.Error())
