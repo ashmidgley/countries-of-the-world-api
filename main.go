@@ -68,12 +68,7 @@ func getEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
-        return
-	}
+    statement, _ := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
     defer statement.Close()
 
     var name string
@@ -156,12 +151,7 @@ func createEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("INSERT into leaderboard (name, country, countries, time) values (?, ?, ?, ?)")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
-        return
-	}
+    statement, _ := database.Prepare("INSERT into leaderboard (name, country, countries, time) values (?, ?, ?, ?)")
     defer statement.Close()
 
     statement.Exec(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time)
@@ -217,12 +207,7 @@ func updateEntry(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
-    statement, err = database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
-        return
-	}
+    statement, _ = database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
     defer statement.Close()
 
     statement.Exec(updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time, id)
@@ -266,12 +251,7 @@ func deleteEntry(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
-    statement, err = database.Prepare("DELETE FROM leaderboard WHERE id = ?")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
-        return
-	}
+    statement, _ = database.Prepare("DELETE FROM leaderboard WHERE id = ?")
     defer statement.Close()
 
     statement.Exec(id)
