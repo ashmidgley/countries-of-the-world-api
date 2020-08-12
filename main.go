@@ -201,7 +201,23 @@ func updateEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
+    statement, _ := database.Prepare("SELECT id FROM leaderboard WHERE id = ?")
+    defer statement.Close()
+
+    var temp int
+    err = statement.QueryRow(id).Scan(&temp)
+    if err != nil {
+        message := err.Error()
+        if strings.Contains(message, "no rows in result set") {
+            writer.WriteHeader(http.StatusNotFound)
+        } else {
+            writer.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(writer, message)
+        }
+        return
+    }
+
+    statement, err = database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
 	if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
