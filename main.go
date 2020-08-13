@@ -21,7 +21,7 @@ func main() {
 	}
     defer database.Close()
 
-    statement := "CREATE TABLE IF NOT EXISTS leaderboard (id INTEGER PRIMARY KEY, name TEXT, country TEXT, countries INTEGER, time TEXT)"
+    statement := "CREATE TABLE IF NOT EXISTS leaderboard (id INTEGER PRIMARY KEY, name TEXT, country TEXT, countries INTEGER, time INTEGER)"
     _, err = database.Exec(statement)
     if err != nil {
 		log.Printf("%q: %s\n", err, statement)
@@ -49,7 +49,7 @@ type Entry struct {
     Name string `json:"name"`
     Country string `json:"country"`
     Countries int `json:"countries"`
-    Time string `json:"time"`
+    Time int `json:"time"`
 }
 
 func getEntry(writer http.ResponseWriter, request *http.Request) {
@@ -68,18 +68,13 @@ func getEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
-        return
-	}
+    statement, _ := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
     defer statement.Close()
 
     var name string
     var country string
     var countries int
-    var time string
+    var time int
     err = statement.QueryRow(id).Scan(&id, &name, &country, &countries, &time)
     if err != nil {
         message := err.Error()
@@ -119,7 +114,7 @@ func getEntries(writer http.ResponseWriter, request *http.Request) {
         var name string
         var country string
         var countries int
-        var time string
+        var time int
         err = rows.Scan(&id, &name, &country, &countries, &time)
         if err != nil {
             fmt.Fprintf(writer, err.Error())
@@ -156,17 +151,25 @@ func createEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("INSERT into leaderboard (name, country, countries, time) values (?, ?, ?, ?)")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
-        return
-	}
+    statement, _ := database.Prepare("INSERT into leaderboard (name, country, countries, time) values (?, ?, ?, ?)")
     defer statement.Close()
 
     statement.Exec(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time)
 
+
+    statement, _ = database.Prepare("SELECT id FROM leaderboard WHERE name = ? AND country = ? AND countries = ? AND time = ?")
+    defer statement.Close()
+
+    var id int
+    err = statement.QueryRow(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
+    if err != nil {
+        writer.WriteHeader(http.StatusInternalServerError)
+        fmt.Fprintf(writer, err.Error())
+        return
+    }
+
     writer.WriteHeader(http.StatusCreated)
+    newEntry.Id = id
     json.NewEncoder(writer).Encode(newEntry)
 }
 
@@ -201,12 +204,23 @@ func updateEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
+    statement, _ := database.Prepare("SELECT id FROM leaderboard WHERE id = ?")
+    defer statement.Close()
+
+    var temp int
+    err = statement.QueryRow(id).Scan(&temp)
+    if err != nil {
+        message := err.Error()
+        if strings.Contains(message, "no rows in result set") {
+            writer.WriteHeader(http.StatusNotFound)
+        } else {
+            writer.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(writer, message)
+        }
         return
-	}
+    }
+
+    statement, _ = database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
     defer statement.Close()
 
     statement.Exec(updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time, id)
@@ -231,15 +245,32 @@ func deleteEntry(writer http.ResponseWriter, request *http.Request) {
 	}
     defer database.Close()
 
-    statement, err := database.Prepare("DELETE FROM leaderboard WHERE id = ?")
-	if err != nil {
-        writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
+    statement, _ := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
+    defer statement.Close()
+
+    var name string
+    var country string
+    var countries int
+    var time int
+    err = statement.QueryRow(id).Scan(&id, &name, &country, &countries, &time)
+    if err != nil {
+        message := err.Error()
+        if strings.Contains(message, "no rows in result set") {
+            writer.WriteHeader(http.StatusNotFound)
+        } else {
+            writer.WriteHeader(http.StatusInternalServerError)
+            fmt.Fprintf(writer, message)
+        }
         return
-	}
+    }
+
+    statement, _ = database.Prepare("DELETE FROM leaderboard WHERE id = ?")
     defer statement.Close()
 
     statement.Exec(id)
+
+    entry := Entry { id, name, country, countries, time }
+    json.NewEncoder(writer).Encode(entry)
 }
 
 var countries = [...]string{
