@@ -23,5 +23,5 @@ go build main.go
 * Commit changes and push to your fork.
 * Submit a pull request.
 
-## Contributers Table
+## Contributors Table
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. If I forget to request your addition to the contributors table after merging your changes, please remind me in the PR.
