@@ -1,255 +1,197 @@
-Andorra
-United Arab Emirates
 Afghanistan
-Antigua and Barbuda
-Anguilla
 Albania
-Armenia
+Algeria
+Andorra
 Angola
+Antigua and barbuda
 Argentina
-American Samoa
-Austria
+Armenia
 Australia
-Aruba
-Aland Islands
+Austria
 Azerbaijan
-Bosnia and Herzegovina
-Barbados
-Bangladesh
-Belgium
-Burkina Faso
-Bulgaria
-Bahrain
-Burundi
-Benin
-Saint Barthelemy
-Brunei Darussalam
-Bolivia
-Bermuda
-Bonaire, Saint Eustachius and Saba
-Brazil
 Bahamas
-Bhutan
-Bouvet Island
-Botswana
+Bahrain
+Bangladesh
+Barbados
 Belarus
+Belgium
 Belize
-Canada
-Cocos (Keeling) Islands
-Democratic Republic of Congo
-Central African Republic
-Republic of Congo
-Switzerland
-Côte d'Ivoire
-Cook Islands
-Chile
+Benin
+Bhutan
+Bolivia
+Bosnia and herzegovina
+Botswana
+Brazil
+Brunei
+Bulgaria
+Burkina faso
+Burundi
+Cambodia
 Cameroon
+Canada
+Cape verde
+Central african republic
+Chad
+Chile
 China
 Colombia
-Costa Rica
+Comoros
+Costa rica
+Croatia
 Cuba
-Cape Verde
-Curaçao
-Christmas Island
 Cyprus
-Czech Republic
-Germany
-Djibouti
+Czech republic
+Cote d'ivoire
+Democratic republic of congo
 Denmark
+Djibouti
 Dominica
-Dominican Republic
-Algeria
+Dominican republic
 Ecuador
 Egypt
-Estonia
-Western Sahara
+El salvador
+Equatorial guinea
 Eritrea
-Spain
+Estonia
 Ethiopia
-Finland
+Federated states of micronesia
 Fiji
-Falkland Islands
-Federated States of Micronesia
-Faroe Islands
+Finland
 France
 Gabon
-United Kingdom
-Georgia
-Grenada
-French Guiana
-Guernsey
-Ghana
-Gibraltar
-Greenland
 Gambia
-Guinea
-Glorioso Islands
-Guadeloupe
-Equatorial Guinea
+Georgia
+Germany
+Ghana
 Greece
-South Georgia and South Sandwich Islands
+Grenada
 Guatemala
-Guam
-Guinea-Bissau
+Guinea
+Guinea-bissau
 Guyana
-Hong Kong
-Heard Island and McDonald Islands
-Honduras
-Croatia
 Haiti
+Honduras
 Hungary
+Iceland
+India
 Indonesia
+Iran
+Iraq
 Ireland
 Israel
-Isle of Man
-India
-British Indian Ocean Territory
-Iraq
-Iran
-Iceland
 Italy
-Jersey
 Jamaica
-Jordan
 Japan
-Juan De Nova Island
+Jordan
+Kazakhstan
 Kenya
-Kyrgyzstan
-Cambodia
 Kiribati
-Comoros
-Saint Kitts and Nevis
-North Korea
-South Korea
 Kosovo
 Kuwait
-Cayman Islands
-Kazakhstan
-Lao People's Democratic Republic
+Kyrgyzstan
+Lao people's democratic republic
+Latvia
 Lebanon
-Saint Lucia
-Liechtenstein
-Sri Lanka
-Liberia
 Lesotho
+Liberia
+Libya
+Liechtenstein
 Lithuania
 Luxembourg
-Latvia
-Libya
-Morocco
-Monaco
-Moldova
-Madagascar
-Montenegro
-Saint Martin
-Marshall Islands
 Macedonia
-Mali
-Macau
-Myanmar
-Mongolia
-Northern Mariana Islands
-Martinique
-Mauritania
-Montserrat
-Malta
-Mauritius
-Maldives
+Madagascar
 Malawi
-Mexico
 Malaysia
+Maldives
+Mali
+Malta
+Marshall islands
+Mauritania
+Mauritius
+Mexico
+Moldova
+Monaco
+Mongolia
+Montenegro
+Morocco
 Mozambique
+Myanmar
 Namibia
-New Caledonia
-Niger
-Norfolk Island
-Nigeria
-Nicaragua
-Netherlands
-Norway
-Nepal
 Nauru
-Niue
-New Zealand
+Nepal
+Netherlands
+New zealand
+Nicaragua
+Niger
+Nigeria
+North korea
+Norway
 Oman
-Panama
-Peru
-French Polynesia
-Papua New Guinea
-Philippines
 Pakistan
-Poland
-Saint Pierre and Miquelon
-Pitcairn Islands
-Puerto Rico
-Palestinian Territories
-Portugal
 Palau
+Palestinian territories
+Panama
+Papua new guinea
 Paraguay
+Peru
+Philippines
+Poland
+Portugal
 Qatar
-Reunion
+Republic of congo
 Romania
-Serbia
 Russia
 Rwanda
-Saudi Arabia
-Solomon Islands
-Seychelles
-Sudan
-Sweden
-Singapore
-Saint Helena
-Slovenia
-Svalbard and Jan Mayen
-Slovakia
-Sierra Leone
-San Marino
+Saint kitts and nevis
+Saint lucia
+Saint vincent and the grenadines
+Samoa
+San marino
+Sao tome and principe
+Saudi arabia
 Senegal
+Serbia
+Seychelles
+Sierra leone
+Singapore
+Slovakia
+Slovenia
+Solomon islands
 Somalia
+South africa
+South korea
+South sudan
+Spain
+Sri lanka
+Sudan
 Suriname
-South Sudan
-Sao Tome and Principe
-El Salvador
-Syria
 Swaziland
-Turks and Caicos Islands
-Chad
-French Southern and Antarctic Lands
-Togo
-Thailand
-Tajikistan
-Tokelau
-Timor-Leste
-Turkmenistan
-Tunisia
-Tonga
-Turkey
-Trinidad and Tobago
-Tuvalu
+Sweden
+Switzerland
+Syria
 Taiwan
+Tajikistan
 Tanzania
-Ukraine
+Thailand
+Timor-leste
+Togo
+Tonga
+Trinidad and tobago
+Tunisia
+Turkey
+Turkmenistan
+Tuvalu
 Uganda
-Jarvis Island
-Baker Island
-Howland Island
-Johnston Atoll
-Midway Islands
-Wake Island
-United States
+Ukraine
+United arab emirates
+United kingdom
+United states
 Uruguay
 Uzbekistan
-Vatican City
-Saint Vincent and the Grenadines
-Venezuela
-British Virgin Islands
-US Virgin Islands
-Vietnam
 Vanuatu
-Wallis and Futuna
-Samoa
+Vatican city
+Venezuela
+Vietnam
 Yemen
-Mayotte
-South Africa
 Zambia
 Zimbabwe
