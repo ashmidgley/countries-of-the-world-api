@@ -14,8 +14,12 @@ import (
     _ "github.com/mattn/go-sqlite3"
 )
 
+var connectionString string
+
 func main() {
-    database, err := sql.Open("sqlite3", "./leaderboard.db")
+    connectionString = "./database/leaderboard.db"
+    
+    database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +64,7 @@ func getEntry(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
-    database, err := sql.Open("sqlite3", "./leaderboard.db")
+    database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
@@ -92,7 +96,7 @@ func getEntry(writer http.ResponseWriter, request *http.Request) {
 }
 
 func getEntries(writer http.ResponseWriter, request *http.Request) {
-    database, err := sql.Open("sqlite3", "./leaderboard.db")
+    database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
@@ -143,7 +147,7 @@ func createEntry(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
-    database, err := sql.Open("sqlite3", "./leaderboard.db")
+    database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
@@ -196,7 +200,7 @@ func updateEntry(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
-    database, err := sql.Open("sqlite3", "./leaderboard.db")
+    database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
@@ -237,7 +241,7 @@ func deleteEntry(writer http.ResponseWriter, request *http.Request) {
         return
     }
 
-    database, err := sql.Open("sqlite3", "./leaderboard.db")
+    database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
         fmt.Fprintf(writer, err.Error())
