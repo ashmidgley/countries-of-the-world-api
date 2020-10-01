@@ -12,12 +12,17 @@ import (
     _ "github.com/mattn/go-sqlite3"
 )
 
-type Entry struct {
+type Entry struct{
     Id int `json:"id"`
     Name string `json:"name"`
     Country string `json:"country"`
     Countries int `json:"countries"`
     Time int `json:"time"`
+}
+
+type EntriesDto struct{
+    Entries []Entry `json:"entries"`
+    HasMore bool `json:"hasMore"`
 }
 
 func GetEntry(writer http.ResponseWriter, request *http.Request) {
@@ -60,18 +65,25 @@ func GetEntry(writer http.ResponseWriter, request *http.Request) {
 }
 
 func GetEntries(writer http.ResponseWriter, request *http.Request) {
+    pageParam := request.URL.Query().Get("page")
+    page, err := strconv.Atoi(pageParam)
+    if err != nil {
+        fmt.Fprintf(writer, "%v\n", err)
+        return
+    }
+
     database, err := sql.Open("sqlite3", connectionString)
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
+        fmt.Fprintf(writer, "%v\n", err)
         return
 	}
     defer database.Close()
 
-    rows, err := database.Query("SELECT * FROM leaderboard")
+    rows, err := database.Query("SELECT * FROM leaderboard ORDER BY countries DESC, time limit 10 offset " + strconv.Itoa(page * 10))
     if err != nil {
         writer.WriteHeader(http.StatusInternalServerError)
-        fmt.Fprintf(writer, err.Error())
+        fmt.Fprintf(writer, "%v\n", err)
         return
     }
     defer rows.Close()
@@ -85,14 +97,25 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
         var time int
         err = rows.Scan(&id, &name, &country, &countries, &time)
         if err != nil {
-            fmt.Fprintf(writer, err.Error())
+            fmt.Fprintf(writer, "%v\n", err)
         }
 
         var entry = Entry { id, name, country, countries, time };
         entries = append(entries, entry)
     }
 
-    json.NewEncoder(writer).Encode(entries)
+    statement, _ := database.Prepare("SELECT id FROM leaderboard ORDER BY countries DESC, time limit 1 offset ?")
+    defer statement.Close()
+    
+    var id string
+    hasMore := true
+    err = statement.QueryRow(strconv.Itoa((page + 1) * 10)).Scan(&id)
+	if err != nil {
+		hasMore = false
+	}
+
+    entriesDto := EntriesDto{ entries, hasMore }
+    json.NewEncoder(writer).Encode(entriesDto)
 }
 
 func CreateEntry(writer http.ResponseWriter, request *http.Request) {
@@ -123,7 +146,6 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
     defer statement.Close()
 
     statement.Exec(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time)
-
 
     statement, _ = database.Prepare("SELECT id FROM leaderboard WHERE name = ? AND country = ? AND countries = ? AND time = ?")
     defer statement.Close()
