@@ -165,7 +165,7 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	writer.WriteHeader(http.StatusCreated)
-	newEntry.Id = id
+	newEntry.ID = id
 	json.NewEncoder(writer).Encode(newEntry)
 }
 
@@ -222,7 +222,7 @@ func UpdateEntry(writer http.ResponseWriter, request *http.Request) {
 
 	statement.Exec(updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time, id)
 
-	updatedEntry.Id = id
+	updatedEntry.ID = id
 	json.NewEncoder(writer).Encode(updatedEntry)
 }
 
