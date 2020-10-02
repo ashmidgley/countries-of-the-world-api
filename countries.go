@@ -227,6 +227,12 @@ var alternativeNamings = []string{
 	"holy see",
 }
 
+var prefixes = map[string]string{
+	"uk":       "Ukraine",
+	"niger":    "Nigeria",
+	"dominica": "Dominican Republic",
+}
+
 var countriesMap = map[string]string{
 	"afghanistan":                       "Afghanistan",
 	"albania":                           "Albania",
@@ -454,6 +460,11 @@ func GetCountries(writer http.ResponseWriter, request *http.Request) {
 // GetAlternativeNamings gets the list of alternative names for countries.
 func GetAlternativeNamings(writer http.ResponseWriter, request *http.Request) {
 	json.NewEncoder(writer).Encode(alternativeNamings)
+}
+
+// GetPrefixes gets the map of the prefix submission to alternative country name.
+func GetPrefixes(writer http.ResponseWriter, request *http.Request) {
+	json.NewEncoder(writer).Encode(prefixes)
 }
 
 // GetCountriesMap gets the map of country name to correctly formatted name used in the SVG map.

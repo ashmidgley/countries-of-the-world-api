@@ -35,6 +35,7 @@ func main() {
 	router.HandleFunc("/api/leaderboard/{id}", DeleteEntry).Methods("DELETE")
 	router.HandleFunc("/api/countries", GetCountries).Methods("GET")
 	router.HandleFunc("/api/countries/alternatives", GetAlternativeNamings).Methods("GET")
+	router.HandleFunc("/api/countries/prefixes", GetPrefixes).Methods("GET")
 	router.HandleFunc("/api/countries/map", GetCountriesMap).Methods("GET")
 	router.HandleFunc("/api/codes", GetCodes).Methods("GET")
 
