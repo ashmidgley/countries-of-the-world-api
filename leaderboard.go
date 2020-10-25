@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 // Entry is the database object for a leaderboard entry.
@@ -37,7 +37,7 @@ func GetEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, err.Error())
@@ -77,7 +77,7 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, "%v\n", err)
@@ -140,7 +140,7 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, err.Error())
@@ -148,16 +148,10 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
 	}
 	defer database.Close()
 
-	statement, _ := database.Prepare("INSERT into leaderboard (name, country, countries, time) values (?, ?, ?, ?)")
-	defer statement.Close()
-
-	statement.Exec(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time)
-
-	statement, _ = database.Prepare("SELECT id FROM leaderboard WHERE name = ? AND country = ? AND countries = ? AND time = ?")
-	defer statement.Close()
+	sqlStatement := "INSERT INTO leaderboard (name, country, countries, time) VALUES ($1, $2, $3, $4) RETURNING id"
 
 	var id int
-	err = statement.QueryRow(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
+	err = database.QueryRow(sqlStatement, newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, err.Error())
@@ -193,7 +187,7 @@ func UpdateEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, err.Error())
@@ -235,7 +229,7 @@ func DeleteEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, err.Error())
