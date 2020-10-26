@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	host     = ""
@@ -10,7 +12,7 @@ const (
 	dbname   = ""
 )
 
-// GetConnectionString returns the postgres connection string.
+// GetConnectionString returns the database connection string.
 func GetConnectionString() string {
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 }
