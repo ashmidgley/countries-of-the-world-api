@@ -1,31 +1,13 @@
 package main
 
 import (
-	"database/sql"
-	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/cors"
 )
 
-const connectionString = "./database/leaderboard.db"
-
 func main() {
-	database, err := sql.Open("sqlite3", connectionString)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer database.Close()
-
-	statement := "CREATE TABLE IF NOT EXISTS leaderboard (id INTEGER PRIMARY KEY, name TEXT, country TEXT, countries INTEGER, time INTEGER)"
-	_, err = database.Exec(statement)
-	if err != nil {
-		log.Printf("%q: %s\n", err, statement)
-		return
-	}
-
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/api/leaderboard", GetEntries).Methods("GET")

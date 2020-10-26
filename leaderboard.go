@@ -7,10 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 )
 
 // Entry is the database object for a leaderboard entry.
@@ -33,39 +32,32 @@ func GetEntry(writer http.ResponseWriter, request *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(request)["id"])
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 	defer database.Close()
 
-	statement, _ := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
-	defer statement.Close()
+	statement := "SELECT * FROM leaderboard WHERE id = $1;"
+	row := database.QueryRow(statement, id)
 
-	var name string
-	var country string
-	var countries int
-	var time int
-	err = statement.QueryRow(id).Scan(&id, &name, &country, &countries, &time)
-	if err != nil {
-		message := err.Error()
-		if strings.Contains(message, "no rows in result set") {
-			writer.WriteHeader(http.StatusNotFound)
-		} else {
-			writer.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(writer, message)
-		}
-		return
+	var entry Entry
+	switch err = row.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time); err {
+	case sql.ErrNoRows:
+		writer.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(writer, "%v\n", err)
+	case nil:
+		json.NewEncoder(writer).Encode(entry)
+	default:
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "%v\n", err)
 	}
-
-	entry := Entry{id, name, country, countries, time}
-	json.NewEncoder(writer).Encode(entry)
 }
 
 // GetEntries gets the leaderboard entries for a given page.
@@ -77,7 +69,7 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, "%v\n", err)
@@ -85,7 +77,7 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
 	}
 	defer database.Close()
 
-	rows, err := database.Query("SELECT * FROM leaderboard ORDER BY countries DESC, time limit 10 offset " + strconv.Itoa(page*10))
+	rows, err := database.Query("SELECT * FROM leaderboard ORDER BY countries DESC, time LIMIT $1 OFFSET $2;", 10, strconv.Itoa(page*10))
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, "%v\n", err)
@@ -95,32 +87,39 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
 
 	var entries = []Entry{}
 	for rows.Next() {
-		var id int
-		var name string
-		var country string
-		var countries int
-		var time int
-		err = rows.Scan(&id, &name, &country, &countries, &time)
+		var entry Entry
+		err = rows.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time)
 		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprintf(writer, "%v\n", err)
+			return
 		}
 
-		var entry = Entry{id, name, country, countries, time}
 		entries = append(entries, entry)
 	}
 
-	statement, _ := database.Prepare("SELECT id FROM leaderboard ORDER BY countries DESC, time limit 1 offset ?")
-	defer statement.Close()
-
-	var id string
-	hasMore := true
-	err = statement.QueryRow(strconv.Itoa((page + 1) * 10)).Scan(&id)
+	err = rows.Err()
 	if err != nil {
-		hasMore = false
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "%v\n", err)
+		return
 	}
 
-	entriesDto := EntriesDto{entries, hasMore}
-	json.NewEncoder(writer).Encode(entriesDto)
+	statement := "SELECT id FROM leaderboard ORDER BY countries DESC, time LIMIT $1 OFFSET $2;"
+	row := database.QueryRow(statement, 1, strconv.Itoa((page+1)*10))
+
+	var id int
+	switch err = row.Scan(&id); err {
+	case sql.ErrNoRows:
+		entriesDto := EntriesDto{entries, false}
+		json.NewEncoder(writer).Encode(entriesDto)
+	case nil:
+		entriesDto := EntriesDto{entries, true}
+		json.NewEncoder(writer).Encode(entriesDto)
+	default:
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "%v\n", err)
+	}
 }
 
 // CreateEntry creates a new leaderboard entry.
@@ -128,7 +127,7 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
 	requestBody, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
@@ -136,31 +135,25 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
 	err = json.Unmarshal(requestBody, &newEntry)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 	defer database.Close()
 
-	statement, _ := database.Prepare("INSERT into leaderboard (name, country, countries, time) values (?, ?, ?, ?)")
-	defer statement.Close()
-
-	statement.Exec(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time)
-
-	statement, _ = database.Prepare("SELECT id FROM leaderboard WHERE name = ? AND country = ? AND countries = ? AND time = ?")
-	defer statement.Close()
+	statement := "INSERT INTO leaderboard (name, country, countries, time) VALUES ($1, $2, $3, $4) RETURNING id;"
 
 	var id int
-	err = statement.QueryRow(newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
+	err = database.QueryRow(statement, newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
@@ -174,14 +167,14 @@ func UpdateEntry(writer http.ResponseWriter, request *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(request)["id"])
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
 	requestBody, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
@@ -189,41 +182,33 @@ func UpdateEntry(writer http.ResponseWriter, request *http.Request) {
 	err = json.Unmarshal(requestBody, &updatedEntry)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 	defer database.Close()
 
-	statement, _ := database.Prepare("SELECT id FROM leaderboard WHERE id = ?")
-	defer statement.Close()
+	statement := "UPDATE leaderboard set name = $2, country = $3, countries = $4, time = $5 where id = $1 RETURNING *;"
 
-	var temp int
-	err = statement.QueryRow(id).Scan(&temp)
-	if err != nil {
-		message := err.Error()
-		if strings.Contains(message, "no rows in result set") {
-			writer.WriteHeader(http.StatusNotFound)
-		} else {
-			writer.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(writer, message)
-		}
-		return
+	row := database.QueryRow(statement, id, updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time)
+
+	var entry Entry
+	switch err = row.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time); err {
+	case sql.ErrNoRows:
+		writer.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(writer, "%v\n", err)
+	case nil:
+		json.NewEncoder(writer).Encode(entry)
+	default:
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "%v\n", err)
 	}
-
-	statement, _ = database.Prepare("UPDATE leaderboard set name = ?, country = ?, countries = ?, time = ? where id = ?")
-	defer statement.Close()
-
-	statement.Exec(updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time, id)
-
-	updatedEntry.ID = id
-	json.NewEncoder(writer).Encode(updatedEntry)
 }
 
 // DeleteEntry deletes an existing leaderboard entry.
@@ -231,42 +216,30 @@ func DeleteEntry(writer http.ResponseWriter, request *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(request)["id"])
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 
-	database, err := sql.Open("sqlite3", connectionString)
+	database, err := sql.Open("postgres", GetConnectionString())
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, err.Error())
+		fmt.Fprintf(writer, "%v\n", err)
 		return
 	}
 	defer database.Close()
 
-	statement, _ := database.Prepare("SELECT * FROM leaderboard WHERE id = ?")
-	defer statement.Close()
+	statement := "DELETE FROM leaderboard WHERE id = $1 RETURNING *;"
+	row := database.QueryRow(statement, id)
 
-	var name string
-	var country string
-	var countries int
-	var time int
-	err = statement.QueryRow(id).Scan(&id, &name, &country, &countries, &time)
-	if err != nil {
-		message := err.Error()
-		if strings.Contains(message, "no rows in result set") {
-			writer.WriteHeader(http.StatusNotFound)
-		} else {
-			writer.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(writer, message)
-		}
-		return
+	var entry Entry
+	switch err = row.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time); err {
+	case sql.ErrNoRows:
+		writer.WriteHeader(http.StatusNotFound)
+		fmt.Fprintf(writer, "%v\n", err)
+	case nil:
+		json.NewEncoder(writer).Encode(entry)
+	default:
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "%v\n", err)
 	}
-
-	statement, _ = database.Prepare("DELETE FROM leaderboard WHERE id = ?")
-	defer statement.Close()
-
-	statement.Exec(id)
-
-	entry := Entry{id, name, country, countries, time}
-	json.NewEncoder(writer).Encode(entry)
 }
