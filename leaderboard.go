@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ashmidgley/countries-of-the-world-api/database"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 )
@@ -36,16 +37,8 @@ func GetEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("postgres", GetConnectionString())
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, "%v\n", err)
-		return
-	}
-	defer database.Close()
-
 	statement := "SELECT * FROM leaderboard WHERE id = $1;"
-	row := database.QueryRow(statement, id)
+	row := database.DBConnection.QueryRow(statement, id)
 
 	var entry Entry
 	switch err = row.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time); err {
@@ -69,15 +62,7 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("postgres", GetConnectionString())
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, "%v\n", err)
-		return
-	}
-	defer database.Close()
-
-	rows, err := database.Query("SELECT * FROM leaderboard ORDER BY countries DESC, time LIMIT $1 OFFSET $2;", 10, strconv.Itoa(page*10))
+	rows, err := database.DBConnection.Query("SELECT * FROM leaderboard ORDER BY countries DESC, time LIMIT $1 OFFSET $2;", 10, strconv.Itoa(page*10))
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, "%v\n", err)
@@ -106,7 +91,7 @@ func GetEntries(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	statement := "SELECT id FROM leaderboard ORDER BY countries DESC, time LIMIT $1 OFFSET $2;"
-	row := database.QueryRow(statement, 1, strconv.Itoa((page+1)*10))
+	row := database.DBConnection.QueryRow(statement, 1, strconv.Itoa((page+1)*10))
 
 	var id int
 	switch err = row.Scan(&id); err {
@@ -139,18 +124,10 @@ func CreateEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("postgres", GetConnectionString())
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, "%v\n", err)
-		return
-	}
-	defer database.Close()
-
 	statement := "INSERT INTO leaderboard (name, country, countries, time) VALUES ($1, $2, $3, $4) RETURNING id;"
 
 	var id int
-	err = database.QueryRow(statement, newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
+	err = database.DBConnection.QueryRow(statement, newEntry.Name, newEntry.Country, newEntry.Countries, newEntry.Time).Scan(&id)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(writer, "%v\n", err)
@@ -186,17 +163,9 @@ func UpdateEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("postgres", GetConnectionString())
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, "%v\n", err)
-		return
-	}
-	defer database.Close()
-
 	statement := "UPDATE leaderboard set name = $2, country = $3, countries = $4, time = $5 where id = $1 RETURNING *;"
 
-	row := database.QueryRow(statement, id, updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time)
+	row := database.DBConnection.QueryRow(statement, id, updatedEntry.Name, updatedEntry.Country, updatedEntry.Countries, updatedEntry.Time)
 
 	var entry Entry
 	switch err = row.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time); err {
@@ -220,16 +189,8 @@ func DeleteEntry(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	database, err := sql.Open("postgres", GetConnectionString())
-	if err != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(writer, "%v\n", err)
-		return
-	}
-	defer database.Close()
-
 	statement := "DELETE FROM leaderboard WHERE id = $1 RETURNING *;"
-	row := database.QueryRow(statement, id)
+	row := database.DBConnection.QueryRow(statement, id)
 
 	var entry Entry
 	switch err = row.Scan(&entry.ID, &entry.Name, &entry.Country, &entry.Countries, &entry.Time); err {

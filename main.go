@@ -1,13 +1,29 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 
+	"github.com/ashmidgley/countries-of-the-world-api/database"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 )
 
 func main() {
+	var err error
+	database.DBConnection, err = sql.Open("postgres", database.GetConnectionString())
+	if err != nil {
+		panic(err)
+	}
+
+	err = database.DBConnection.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Successfully connected to database!")
+
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/api/leaderboard", GetEntries).Methods("GET")

@@ -1,8 +1,6 @@
-package main
+package database
 
-import (
-	"fmt"
-)
+import "fmt"
 
 const (
 	host     = ""
